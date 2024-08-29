@@ -138,19 +138,23 @@ fi
 echo "リポジトリのセットアップが完了しました。"
 
 # SourceTreeに追加
-if command -v stree &> /dev/null; then
-  # リモートの変更を取得し、ローカルの変更とマージする
-  git fetch origin
-  git merge --no-edit origin/main
+if [ "$ADD_TO_SOURCETREE" = true ]; then
+  if command -v stree &> /dev/null; then
+    # リモートの変更を取得し、ローカルの変更とマージする
+    git fetch origin
+    git merge --no-edit origin/main
 
-  # 変更をプッシュ
-  git push origin main
+    # 変更をプッシュ
+    git push origin main
 
-  # SourceTreeに追加
-  stree add "$local_path"
-  echo "リポジトリがSourceTreeに追加されました。"
+    # SourceTreeに追加
+    stree add "$local_path"
+    echo "リポジトリがSourceTreeに追加されました。"
+  else
+    echo "警告: SourceTreeがインストールされていないか、パスが通っていません。手動でリポジトリを追加してください。"
+  fi
 else
-  echo "警告: SourceTreeがインストールされていないか、パスが通っていません。手動でリポジトリを追加してください。"
+  echo "SourceTreeへの追加はスキップされました。"
 fi
 
-echo "リポジトリのセットアップとSourceTreeへの追加が完了しました。"
+echo "リポジトリのセットアップが完了しました。"
