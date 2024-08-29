@@ -2,6 +2,9 @@
 # INTERACTIVE_MODE=false は非対話型モード、INTERACTIVE_MODE=true は対話型モードを意味します。
 INTERACTIVE_MODE=false
 
+# SourceTreeにリポジトリを追加するかどうか（true/false）
+ADD_TO_SOURCETREE=false
+
 # 非対話型モード用の設定
 # リポジトリ名（例："my-new-repo"）
 REPO_NAME="my-new-repo"
@@ -29,3 +32,6 @@ CREATE_GITIGNORE=true
 
 # ライセンスの選択（1: MIT, 2: Apache-2.0, 3: GPL-3.0, 4: No license）
 LICENSE_CHOICE=1
+
+# GitHubユーザー名
+USER_NAME="your-github-username"
