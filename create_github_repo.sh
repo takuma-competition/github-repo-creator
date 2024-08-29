@@ -6,6 +6,12 @@ source configs.txt
 # トークンを環境変数から読み込む
 token=${GITHUB_TOKEN}
 
+# ユーザー名の確認
+if [ -z "$USER_NAME" ]; then
+  echo "エラー: USER_NAMEが設定されていません。configs.txtファイルを確認してください。"
+  exit 1
+fi
+
 if [ "$INTERACTIVE_MODE" = true ]; then
     # ユーザー入力を取得
     read -p "リポジトリ名を入力してください: " repo_name
@@ -26,7 +32,7 @@ if [ "$INTERACTIVE_MODE" = true ]; then
     echo "設定された値:"
     echo "トークン: $token"
     echo "リポジトリ名: $repo_name"
-    echo "ローカルパス: $local_path"
+    echo "ロールパス: $local_path"
     echo "組織アカウント: $is_org"
     echo "プライベートリポジトリ: $is_private"
     echo "README作成: $create_readme"
@@ -112,7 +118,7 @@ git init -b main
 if [ "$is_org" = true ] || [ "$is_org" = "y" ] && [ -n "$ORG_NAME" ]; then
   git remote add origin "https://github.com/$ORG_NAME/$repo_name.git"
 else
-  git remote add origin "https://github.com/$(git config user.name)/$repo_name.git"
+  git remote add origin "https://github.com/$USER_NAME/$repo_name.git"
 fi
 
 if [ "$create_readme" = true ] || [ "$create_readme" = "y" ]; then
@@ -130,3 +136,21 @@ if [ "$create_gitignore" = true ] || [ "$create_gitignore" = "y" ]; then
 fi
 
 echo "リポジトリのセットアップが完了しました。"
+
+# SourceTreeに追加
+if command -v stree &> /dev/null; then
+  # リモートの変更を取得し、ローカルの変更とマージする
+  git fetch origin
+  git merge --no-edit origin/main
+
+  # 変更をプッシュ
+  git push origin main
+
+  # SourceTreeに追加
+  stree add "$local_path"
+  echo "リポジトリがSourceTreeに追加されました。"
+else
+  echo "警告: SourceTreeがインストールされていないか、パスが通っていません。手動でリポジトリを追加してください。"
+fi
+
+echo "リポジトリのセットアップとSourceTreeへの追加が完了しました。"
