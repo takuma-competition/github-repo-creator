@@ -1,0 +1,31 @@
+# 対話型モードを使用するかどうか（true/false）
+# INTERACTIVE_MODE=false は非対話型モード、INTERACTIVE_MODE=true は対話型モードを意味します。
+INTERACTIVE_MODE=false
+
+# 非対話型モード用の設定
+# リポジトリ名（例："my-new-repo"）
+REPO_NAME="my-new-repo"
+
+# ローカルパス（例："/Users/takuma/Desktop/github/my-new-repo"）
+LOCAL_PATH="/Users/takuma/Desktop/my-new-repo"
+
+# 組織アカウントで作成するかどうか（true/false）
+IS_ORG=false
+
+# 組織名（IS_ORGがtrueの場合に設定）
+ORG_NAME=
+
+# プライベートリポジトリにするかどうか（true/false）
+IS_PRIVATE=true
+
+# READMEを作成するかどうか（true/false）
+CREATE_README=true
+
+# リポジトリの説明
+DESCRIPTION="This is a new repository created by script"
+
+# .gitignoreファイルを作成するかどうか（true/false）
+CREATE_GITIGNORE=true
+
+# ライセンスの選択（1: MIT, 2: Apache-2.0, 3: GPL-3.0, 4: No license）
+LICENSE_CHOICE=1
