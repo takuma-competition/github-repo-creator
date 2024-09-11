@@ -164,13 +164,6 @@ if ! git remote add origin "$remote_url"; then
 fi
 echo "リモートの設定が完了しました"
 
-# リモートにmainブランチをプッシュ
-echo "リモートにmainブランチをプッシュしています..."
-if ! git push -u origin main; then
-    handle_error "リモートへのmainブランチのプッシュに失敗しました"
-fi
-echo "リモートへのmainブランチのプッシュが完了しました"
-
 # リモートの変更を取得
 echo "リモートの変更を取得しています..."
 if ! git fetch origin; then
