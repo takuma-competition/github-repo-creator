@@ -111,50 +111,107 @@ else
 fi
 
 # ローカルリポジトリの初期化
+
+# Function to handle errors
+handle_error() {
+    echo "Error: $1"
+    read -p "Do you want to continue anyway? (y/n) " choice
+    case "$choice" in 
+      y|Y ) echo "Continuing...";;
+      n|N ) echo "Exiting..."; exit 1;;
+      * ) echo "Invalid input. Exiting..."; exit 1;;
+    esac
+}
+
+# ローカルリポジトリの初期化
 mkdir -p "$local_path"
-cd "$local_path" || exit
-git init -b main
+cd "$local_path" || handle_error "Failed to change directory to $local_path"
+if ! git init -b main; then
+    handle_error "Failed to initialize git repository"
+fi
 
+# リモートの設定
 if [ "$is_org" = true ] || [ "$is_org" = "y" ] && [ -n "$ORG_NAME" ]; then
-  git remote add origin "https://github.com/$ORG_NAME/$repo_name.git"
+    remote_url="https://github.com/$ORG_NAME/$repo_name.git"
 else
-  git remote add origin "https://github.com/$USER_NAME/$repo_name.git"
+    remote_url="https://github.com/$USER_NAME/$repo_name.git"
 fi
 
+if ! git remote add origin "$remote_url"; then
+    handle_error "Failed to add remote origin"
+fi
+
+# リモートの変更を取得
+if ! git fetch origin; then
+    handle_error "Failed to fetch from remote"
+fi
+
+# README.mdの作成
 if [ "$create_readme" = true ] || [ "$create_readme" = "y" ]; then
-  echo "# $repo_name" > README.md
-  git add README.md
-  git commit -m "Initial commit"
-  git push -u origin main
+    if ! git pull origin main --allow-unrelated-histories; then
+        handle_error "Failed to pull from remote for README creation"
+    fi
+    echo "# $repo_name" > README.md
+    git add README.md
+    if ! git commit -m "Initial commit"; then
+        handle_error "Failed to commit README.md"
+    fi
+    if ! git push -u origin main; then
+        handle_error "Failed to push README.md to remote"
+    fi
 fi
 
+# .gitignoreの作成
 if [ "$create_gitignore" = true ] || [ "$create_gitignore" = "y" ]; then
-  touch .gitignore
-  git add .gitignore
-  git commit -m "Add .gitignore"
-  git push
+    if ! git pull origin main; then
+        handle_error "Failed to pull from remote for .gitignore creation"
+    fi
+    touch .gitignore
+    git add .gitignore
+    if ! git commit -m "Add .gitignore"; then
+        handle_error "Failed to commit .gitignore"
+    fi
+    if ! git push origin main; then
+        handle_error "Failed to push .gitignore to remote"
+    fi
 fi
 
 echo "リポジトリのセットアップが完了しました。"
 
 # SourceTreeに追加
 if [ "$ADD_TO_SOURCETREE" = true ]; then
-  if command -v stree &> /dev/null; then
-    # リモートの変更を取得し、ローカルの変更とマージする
-    git fetch origin
-    git merge --no-edit origin/main
+    if command -v stree &> /dev/null; then
+        # リモートの変更を取得し、ローカルの変更とマージする
+        if ! git fetch origin; then
+            handle_error "Failed to fetch from remote for SourceTree addition"
+        fi
+        if ! git merge --no-edit origin/main; then
+            handle_error "Failed to merge remote changes"
+        fi
+        
+        # マージ後の状態を確認
+        if ! git diff --quiet; then
+            git add .
+            if ! git commit -m "Merge remote changes"; then
+                handle_error "Failed to commit merged changes"
+            fi
+        fi
 
-    # 変更をプッシュ
-    git push origin main
+        # 変更をプッシュ
+        if ! git push origin main; then
+            handle_error "Failed to push changes to remote"
+        fi
 
-    # SourceTreeに追加
-    stree add "$local_path"
-    echo "リポジトリがSourceTreeに追加されました。"
-  else
-    echo "警告: SourceTreeがインストールされていないか、パスが通っていません。手動でリポジトリを追加してください。"
-  fi
+        # SourceTreeに追加
+        if ! stree add "$local_path"; then
+            handle_error "Failed to add repository to SourceTree"
+        fi
+        echo "リポジトリがSourceTreeに追加されました。"
+    else
+        echo "警告: SourceTreeがインストールされていないか、パスが通っていません。手動でリポジトリを追加してください。"
+    fi
 else
-  echo "SourceTreeへの追加はスキップされました。"
+    echo "SourceTreeへの追加はスキップされました。"
 fi
 
 echo "リポジトリのセットアップが完了しました。"
